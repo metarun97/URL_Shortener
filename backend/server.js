@@ -14,7 +14,9 @@ dns.setServers(["1.1.1.1", "8.8.8.8"]);
 /* Connect to mongodDb database */
 connectToDb();
 
+const port = process.env.PORT || 3000;
+
 /* Server started */
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+app.listen(`${port}`, () => {
+  console.log(`Server is running on port http://localhost:${port}`);
 })
