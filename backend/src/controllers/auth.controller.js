@@ -56,7 +56,6 @@ export const registerUser = async (req, res) => {
   }
 }
 
-
 // loginUser API Controller:-
 export const loginUser = async (req, res) => {
   try {
