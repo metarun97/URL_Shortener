@@ -1,13 +1,13 @@
 // Imported items:-
 import jwt from "jsonwebtoken";
 
-
-export const authenticationExcess = async (req, res, next) => {
+// authenticationPass for pass the authenticated user:-
+export const authenticationPass = async (req, res, next) => {
   const token = req.cookies.token;
 
   // If token not found:-
   if (!token) {
-    return res.status(401).json({
+    return res.status(404).json({
       message: "Unotherized: Token not found",
     })
   }
@@ -16,8 +16,10 @@ export const authenticationExcess = async (req, res, next) => {
     // Verify token and get user data and pass data to req.user:-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    // set user as decoded data:-
     const user = decoded;
 
+    // assing the value or user to req.user:-
     req.user = user;
 
     next();
@@ -26,9 +28,5 @@ export const authenticationExcess = async (req, res, next) => {
       message: "Unotherized",
     })
   }
-
-
-
-
-
 }
+
