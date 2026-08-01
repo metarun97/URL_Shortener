@@ -1,14 +1,19 @@
 import { createRoot } from 'react-dom/client';
 import './index.css';
-import App from './App.jsx';
 import { ToastContainer } from 'react-toastify';
-// import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import App from './RootLayout.jsx';
+import { createRouter, RouterProvider } from '@tanstack/react-router';
+import { routeTree } from './routes/routeTree.js';
+import { Provider } from 'react-redux';
+import { store } from './store/store';
 
-// const queryClient = new QueryClient();
+const router = createRouter({ routeTree });
 
 createRoot(document.getElementById('root')).render(
   <>
-    <ToastContainer />
-    <App />
-  </>
+    <Provider store={store}>
+      <ToastContainer />
+      <RouterProvider router={router} />
+    </Provider>
+  </>,
 );
