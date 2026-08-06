@@ -1,6 +1,9 @@
 import { useForm } from 'react-hook-form';
 import { loginUser } from '../apis/createUser.api.js';
 import { toast } from 'react-toastify';
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from '../store/slice/authSlice.js';
+import { useNavigate } from '@tanstack/react-router';
 
 const LoginForm = () => {
   const {
@@ -11,11 +14,19 @@ const LoginForm = () => {
     reset,
   } = useForm();
 
+  const auth = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  console.log(auth);
+
   /* Login handler */
   const loginHandler = async (data) => {
     try {
       const { email, password } = data;
-      await loginUser(email, password);
+      const loginData = await loginUser(email, password);
+      const user = loginData?.user || loginData;
+      dispatch(login(user));
+      navigate({ to: '/dashboard', replace: true });
       toast.success('User loggedIn successfully✅');
       reset();
     } catch (error) {

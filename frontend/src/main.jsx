@@ -6,14 +6,24 @@ import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { routeTree } from './routes/routeTree.js';
 import { Provider } from 'react-redux';
 import { store } from './store/store';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-const router = createRouter({ routeTree });
+
+const queryClient = new QueryClient();
+
+const router = createRouter({
+  routeTree,
+  context: {
+    queryClient,
+    store,
+  },
+});
 
 createRoot(document.getElementById('root')).render(
-  <>
-    <Provider store={store}>
+  <Provider store={store}>
+    <QueryClientProvider client={queryClient}>
       <ToastContainer />
       <RouterProvider router={router} />
-    </Provider>
-  </>,
+    </QueryClientProvider>
+  </Provider>,
 );

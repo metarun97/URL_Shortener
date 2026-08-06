@@ -22,6 +22,7 @@ export const authenticationPass = async (req, res, next) => {
     // assing the value or user to req.user:-
     req.user = user;
 
+    // proceed to next step:-
     next();
   } catch (error) {
     res.status(401).json({

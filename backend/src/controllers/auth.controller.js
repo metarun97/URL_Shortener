@@ -1,12 +1,13 @@
 import userModel from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import generateGravatarUrl from '../utils/gravetar.js';
 
 
 // registerUser API Controller:-
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, fullName: { firstName, lastName } } = req.body;
+    const { name, email, password } = req.body;
 
     // Find user by username and email:-
     const existingUser = await userModel.findOne({
@@ -20,24 +21,26 @@ export const registerUser = async (req, res) => {
     // Make password hash:-
     const hash = await bcrypt.hash(password, 10);
 
+    // gravatar created:-
+    const gravatarCreated = generateGravatarUrl(email)
+
     // Create a new user for regsiter:-
     const user = await userModel.create({
       name,
       email,
       password: hash,
-      fullName: {
-        firstName, lastName
-      }
+      avatar: gravatarCreated,
     });
 
-    // Give token to register user:-
+    // Give token to registered user:-
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
     // Save token in browser's cookies:-
     res.cookie("token", token, {
       httpOnly: true,
-      secure: true,
-      maxAge: 24 * 60 * 60 * 1000   // 1 day
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 1000   // 1 hour
     })
 
     // Final response:-
@@ -47,7 +50,7 @@ export const registerUser = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        fullName: user.fullName
+        avatar: user.avatar,
       },
     });
   } catch (error) {
@@ -59,29 +62,25 @@ export const registerUser = async (req, res) => {
 // loginUser API Controller:-
 export const loginUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { email, password } = req.body;
 
     // Find user by name and email:-
-    const user = await userModel.findOne({
-      $or: [
-        { name },
-        { email },
-      ]
-    }).select("+password");
+    const user = await userModel.findOne({ email }).select("+password");
 
     // If user not found:-
     if (!user) {
       return res.status(401).json({
-        message: 'Invalid credentials'
+        message: 'Invalid credential:Email not matched'
       });
     }
+
     // If user found then check password matched or not:-
     const isPasswordMatch = await bcrypt.compare(password, user.password);
 
     // If password not matched:-
     if (!isPasswordMatch) {
       return res.status(401).json({
-        message: 'Invalid credentials'
+        message: 'Invalid credential:Password not matched'
       });
     }
 
@@ -91,23 +90,24 @@ export const loginUser = async (req, res) => {
     // Save token for the login user:-
     res.cookie('token', token, {
       httpOnly: true,
-      secure: true,
-      maxAge: 24 * 60 * 60 * 1000,      // 1day
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 1000   // 1 hour
     });
 
     // Final response:-
-    return res.status(200).json({
+    res.status(200).json({
       message: 'User logged in successfully',
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
-        fullName: user.fullName,
+        avatar: user.avatar,
       },
     });
   } catch (error) {
-    return res.status(500).json({
-      message: 'Internal server error',
+    res.status(500).json({
+      message: error.message,
     });
   }
 }

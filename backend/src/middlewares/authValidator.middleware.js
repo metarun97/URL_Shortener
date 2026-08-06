@@ -28,27 +28,20 @@ export const registerUserValidation = [
   body("password")
     .isLength({ min: 6 })
     .withMessage("password must be 6 or more charachter long"),
-  body("fullName.firstName")
+  body("avatar")
+    .optional()
     .isString()
-    .withMessage("firstName must be a string")
-    .notEmpty()
-    .withMessage("firstName is required"),
-  body("fullName.lastName")
-    .isString()
-    .withMessage("lastName must be a string")
-    .notEmpty()
-    .withMessage("lastName is required"),
+    .withMessage("avatar must be a string"),
+
   respondWithVelidationErrors
 ]
 
 // Login validation rules:-
 export const loginUserValidation = [
-  body("name")
-    .isString()
-    .optional()
-    .withMessage("Invalid name credential"),
+
   body("email")
-    .optional()
+    .notEmpty()
+    .withMessage("email must be required")
     .isString()
     .withMessage("Invalid email credential"),
   body("password")
@@ -56,3 +49,26 @@ export const loginUserValidation = [
     .withMessage("Invalid password credential"),
   respondWithVelidationErrors
 ]
+
+
+export const createShortUrlValidation = [
+  body("full_url")
+    .trim()
+    .notEmpty()
+    .withMessage("Original URL is required")
+    .isURL({
+      protocols: ["http", "https"],
+      require_protocol: true,
+    })
+    .withMessage("Please enter a valid URL (http:// or https://)"),
+
+  body("short_url")
+    .optional()
+    .trim()
+    .isLength({ min: 4, max: 20 })
+    .withMessage("Short code must be between 4 and 20 characters")
+    .matches(/^[a-zA-Z0-9_-]+$/)
+    .withMessage(
+      "Short code can only contain letters, numbers, hyphens (-), and underscores (_)"
+    ),
+];

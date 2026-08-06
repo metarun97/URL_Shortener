@@ -1,5 +1,6 @@
 /* Imported elements */
 import mongoose from "mongoose";
+import generateGravatarUrl from "../utils/gravetar.js";
 
 
 /* user Schema created */
@@ -11,15 +12,20 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     unique: true,
+    required:true,
   },
   password: {
     type: String,
     required: true,
     select: false,
   },
-  fullName: {
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true }
+  avatar: {
+    type: String,
+    required: false,
+    // add gravetar as default
+    default: function () {
+      return generateGravatarUrl(this.email);
+    },
   }
 }, { timestamps: true })
 

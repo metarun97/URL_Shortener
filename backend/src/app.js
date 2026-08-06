@@ -5,11 +5,15 @@ import authRoutes from './routes/auth.routes.js';
 import urlRoutes from './routes/url.routes.js';
 import cors from "cors";
 
+
 /* Server created */
 const app = express();
 
 /* Remove cors error */
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:5173", // Vite-React
+  credentials: true,
+}));
 
 /* Middleware to read req.body data */
 app.use(express.json());
@@ -18,7 +22,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 /* Auth routes main endpoint */
-// app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/url", urlRoutes);
 
 export default app;

@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "dev": "nodemon server.js",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -11,9 +14,14 @@
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-validator": "^7.3.2",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.7.4"
+    "mongoose": "^9.7.4",
+    "nanoid": "^6.0.0"
+  },
+  "devDependencies": {
   }
 }

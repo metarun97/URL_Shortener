@@ -7,7 +7,7 @@ const AuthPage = () => {
       <div className="w-full max-w-2xl rounded-2xl p-8">
 
         {/* My UrlForm to create shortenUrl */}
-        <RegisterForm />
+        {/* <RegisterForm /> */}
         <LoginForm />
       </div>
     </div>
