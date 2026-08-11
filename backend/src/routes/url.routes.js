@@ -16,7 +16,7 @@ router.post("/create", authenticationPass, createShortUrlValidation, createShort
 router.get("/myAllUrls", authenticationPass, getAllUsersUrl);
 
 /* /api/url/:shortedId redirect Endpoint */
-router.post("/:shortedId", redirectShortUrl);
+router.get("/:shortedId", redirectShortUrl);
 
 export default router;
 

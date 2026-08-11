@@ -115,16 +115,34 @@ export const loginUser = async (req, res) => {
 // meUser API Controller:-
 export const meUser = async (req, res) => {
 
+  const userId = req.user.id;
+
+  const user = await userModel.findById(userId);
+
+  if (!user) {
+    return res.status(404).json({
+      message: "User not found",
+    })
+  }
+
   // Final response to find user:-
   res.status(200).json({
     message: "User fetched successfully.",
-    user: req.user,
+    data: user,
   })
 }
 
 // logoutUser API Controller:-
 export const logoutUser = async (req, res) => {
   try {
+    const token = req.cookies.token;
+
+    if (!token) {
+      return res.status(404).json({
+        message: "Login user not found"
+      })
+    }
+
     // Clear cookie form the browser:-
     res.clearCookie("token", {
       httpOnly: true,
@@ -137,7 +155,7 @@ export const logoutUser = async (req, res) => {
     })
   } catch (error) {
     res.status(500).json({
-      message: "Internal server error",
+      message: error.message,
     })
   }
 }

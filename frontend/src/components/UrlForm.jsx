@@ -1,103 +1,76 @@
 import { useState } from 'react';
 import { createShortUrl } from '../apis/createShortUrl.api.js';
 import { toast } from 'react-toastify';
+import { QueryClient, useQueryClient } from '@tanstack/react-query';
+import { Link2, Sparkles } from 'lucide-react';
 
 const UrlForm = () => {
   const [urlValue, seturlValue] = useState('');
   const [shortUrlVal, setShortUrlVal] = useState('');
   const [copied, setCopied] = useState(false);
+  const queryClient = useQueryClient();
 
   /* submitHandler Function */
   const submitHandler = async (e) => {
     e.preventDefault();
 
     const shortUrl = await createShortUrl(urlValue);
-    setShortUrlVal(`http://localhost:3000/api/url/${shortUrl}`);
+    setShortUrlVal(shortUrl);
+    queryClient.invalidateQueries({ queryKey: ['user-allUrls'] });
+    seturlValue('');
     toast.success('Short url created', { autoClose: 1000 });
-
-  };
-
-  // const mutation = useMutation({
-  //   mutationFn: submitHandler,
-  //   onSuccess: () => {
-  //     // Invalidate and refetch
-  //     queryClient.invalidateQueries({ queryKey: ['todos'] });
-  //   },
-  // });
-
-  /* copyToClipboard Function */
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(shortUrlVal);
-
-      setCopied(true);
-
-      setTimeout(() => {
-        setCopied(false);
-      }, 2000);
-    } catch (err) {
-      console.log(err);
-    }
   };
 
   return (
     <>
       {/* Form */}
-      <form onSubmit={(e) => submitHandler(e)} className="space-y-5">
+      <form onSubmit={submitHandler} className="space-y-6">
+        {/* Heading */}
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500">
+            <Sparkles className="h-7 w-7 text-white" />
+          </div>
+
+          <h2 className="text-3xl font-bold text-white">Create Short URL</h2>
+
+          <p className="mt-2 text-slate-400">
+            Paste your long URL below and generate a secure short link
+            instantly.
+          </p>
+        </div>
+
+        {/* URL Input */}
         <div>
           <label
             htmlFor="url"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="mb-2 block text-sm font-medium text-slate-300"
           >
-            Enter URL
+            Long URL
           </label>
 
-          <input
-            id="url"
-            type="url"
-            required
-            placeholder="https://example.com"
-            value={urlValue}
-            className="w-full border border-gray-300 rounded-lg px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-            onInput={(e) => seturlValue(e.target.value)}
-          />
+          <div className="flex items-center rounded-xl border border-slate-700 bg-slate-950 px-4 transition focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20">
+            <Link2 className="h-5 w-5 text-slate-500" />
+
+            <input
+              id="url"
+              type="url"
+              required
+              value={urlValue}
+              onChange={(e) => seturlValue(e.target.value)}
+              placeholder="https://example.com/very-long-url"
+              className="w-full bg-transparent px-3 py-4 text-white placeholder:text-slate-500 outline-none"
+            />
+          </div>
         </div>
 
+        {/* Submit */}
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition duration-200 cursor-pointer"
+          className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 py-3.5 font-semibold text-white transition duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-indigo-500/30 active:scale-[0.98]"
         >
           Shorten URL
         </button>
       </form>
-
-      {/* Result */}
-      {shortUrlVal && (
-        <div className="mt-8 border border-gray-300 rounded-xl bg-slate-50 p-5">
-          <h2 className="font-semibold text-lg mb-3">Generated Short URL</h2>
-
-          <div className="flex gap-3">
-            <input
-              type="text"
-              readOnly
-              value={shortUrlVal}
-              className="flex-1 border border-gray-300 outline-none rounded-lg px-4 py-3 bg-white"
-            />
-
-            <button
-              onClick={copyToClipboard}
-              className={`px-6 rounded-lg cursor-pointer transition-all duration-300
-    ${
-      copied
-        ? 'bg-green-600 text-white'
-        : 'border border-green-600 font-semibold text-green-600 hover:bg-green-600 hover:text-white'
-    }`}
-            >
-              {copied ? 'Copied!' : 'Copy'}
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 };

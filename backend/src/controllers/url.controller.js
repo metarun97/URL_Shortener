@@ -35,7 +35,6 @@ export const createShortUrl = async (req, res) => {
       message: "Short URL created successfully",
       newUrl: newUrl,
       user: userId,
-
     })
 
   } catch (error) {
@@ -45,11 +44,12 @@ export const createShortUrl = async (req, res) => {
   }
 }
 
-
 //* redirectShortUrl API Controller:-
 export const redirectShortUrl = async (req, res) => {
   try {
     const { shortedId } = req.params;
+
+    // console.log(shortedId)
 
     // find the url behalf or shortenId:-
     const url = await urlModel.findOne({ short_url: shortedId });
@@ -88,7 +88,7 @@ export const getAllUsersUrl = async (req, res) => {
 
     const urls = await urlModel
       .find({ user: userId })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 }).populate("user");
 
     return res.status(200).json({
       count: urls.length,

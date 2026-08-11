@@ -1,6 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { registerUser } from '../apis/createUser.api.js';
 import { toast } from 'react-toastify';
+import { Link } from '@tanstack/react-router';
 
 const RegisterForm = () => {
   const {
@@ -27,7 +28,7 @@ const RegisterForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
         <h1 className="text-3xl font-bold text-center text-gray-800">
           Create Account
@@ -138,12 +139,13 @@ const RegisterForm = () => {
         {/* Login Link */}
         <p className="mt-6 text-center text-gray-600">
           Already have an account?
-          <button
+          <Link
+            to="/login"
             type="button"
             className="font-semibold text-blue-600 hover:underline"
           >
             Login
-          </button>
+          </Link>
         </p>
       </div>
     </div>

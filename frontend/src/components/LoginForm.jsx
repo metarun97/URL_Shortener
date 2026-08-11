@@ -3,7 +3,7 @@ import { loginUser } from '../apis/createUser.api.js';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../store/slice/authSlice.js';
-import { useNavigate } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 
 const LoginForm = () => {
   const {
@@ -17,7 +17,7 @@ const LoginForm = () => {
   const auth = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  console.log(auth);
+  // console.log(auth);
 
   /* Login handler */
   const loginHandler = async (data) => {
@@ -121,12 +121,13 @@ const LoginForm = () => {
         {/* Register */}
         <p className="text-center text-gray-600 mt-6">
           Don't have an account?
-          <button
+          <Link
+            to="/register"
             type="button"
             className="text-blue-600 font-semibold hover:underline"
           >
             Register
-          </button>
+          </Link>
         </p>
       </div>
     </div>
@@ -134,3 +135,7 @@ const LoginForm = () => {
 };
 
 export default LoginForm;
+
+
+
+

@@ -1,5 +1,5 @@
 import { createRoute } from "@tanstack/react-router";
-import { rootRoute } from "./routeTree";
+import { rootRoute } from "./routeTree.routes";
 import HomePage from "../pages/HomePage";
 
 export const homepageRoute = createRoute({

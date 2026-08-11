@@ -1,6 +1,6 @@
 /* Imported elements */
 import express from 'express';
-import { registerUser, loginUser, meUser } from '../controllers/auth.controller.js';
+import { registerUser, loginUser, meUser, logoutUser } from '../controllers/auth.controller.js';
 import { loginUserValidation, registerUserValidation } from '../middlewares/authValidator.middleware.js';
 import { authenticationPass } from '../middlewares/auth.middleware.js';
 
@@ -17,6 +17,6 @@ router.post("/login", loginUserValidation, loginUser);
 router.get("/me", authenticationPass, meUser)
 
 /*   /api/auth/logout Endpoint   */
-// router.get("/logout", logoutUser);
+router.post("/logout", logoutUser);
 
 export default router;
