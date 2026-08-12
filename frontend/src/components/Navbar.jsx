@@ -31,12 +31,37 @@ const Navbar = () => {
         </Link>
 
         {/* Right Side */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
+          {/* Navigation Links */}
+          {user && (
+            <nav className="hidden items-center gap-6 md:flex">
+              <Link
+                to="/"
+                className="text-sm font-medium text-slate-300 transition hover:text-indigo-400"
+                activeProps={{
+                  className: 'text-indigo-400',
+                }}
+              >
+                Home
+              </Link>
+
+              <Link
+                to="/dashboard"
+                className="text-sm font-medium text-slate-300 transition hover:text-indigo-400"
+                activeProps={{
+                  className: 'text-indigo-400',
+                }}
+              >
+                Dashboard
+              </Link>
+            </nav>
+          )}
+
           {/* Profile */}
           {user && (
             <button className="group flex items-center gap-3 rounded-full border border-slate-700 bg-slate-900/70 p-1 pr-4 transition hover:border-indigo-500 hover:bg-slate-800">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 to-cyan-500 text-sm font-bold text-white">
-                {user?.data?.name.slice(0, 1)}
+                {user?.data?.name?.slice(0, 1)}
               </div>
 
               <div className="hidden text-left md:block">

@@ -1,3 +1,5 @@
+import { Link } from '@tanstack/react-router';
+
 const Hero = () => {
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
@@ -13,54 +15,73 @@ const Hero = () => {
 
         {/* Heading */}
         <h1 className="max-w-4xl text-5xl font-extrabold leading-tight tracking-tight text-white md:text-7xl">
-          Make Your Links
+          Shorten, Manage &
           <span className="block bg-gradient-to-r from-indigo-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent">
-            Short, Smart & Shareable
+            Track Every Link
           </span>
         </h1>
 
         {/* Description */}
         <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
-          Transform long and messy URLs into clean, memorable links in
-          seconds. Track clicks, manage your links, and share them anywhere.
+          Sign in to create secure short links, monitor click analytics,
+          organize your URLs, and access them from anywhere.
         </p>
 
         {/* CTA Buttons */}
-        <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-          <button className="rounded-xl bg-indigo-600 px-8 py-4 font-semibold text-white transition hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30">
-            Shorten URL
-          </button>
 
-          <button className="rounded-xl border border-slate-700 bg-slate-900/50 px-8 py-4 font-semibold text-slate-200 transition hover:border-indigo-500 hover:bg-slate-800">
-            Learn More
-          </button>
+        <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+          <Link
+            to="/login"
+            className="rounded-xl bg-indigo-600 px-8 py-4 text-center font-semibold text-white transition hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-500/30"
+          >
+            Login to Shorten URLs
+          </Link>
+
+          <Link
+            to="/register"
+            className="rounded-xl border border-slate-700 bg-slate-900/50 px-8 py-4 text-center font-semibold text-slate-200 transition hover:border-indigo-500 hover:bg-slate-800"
+          >
+            Create Free Account
+          </Link>
         </div>
 
         {/* Preview Card */}
         <div className="mt-16 w-full max-w-3xl rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl backdrop-blur">
-          <div className="flex flex-col gap-4 md:flex-row">
-            <input
-              type="text"
-              placeholder="https://www.example.com/very-long-url..."
-              className="flex-1 rounded-lg border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder:text-slate-500 outline-none focus:border-indigo-500"
-            />
+          <p className="mb-5 text-sm uppercase tracking-widest text-indigo-400">
+            Dashboard Preview
+          </p>
 
-            <button className="rounded-lg bg-gradient-to-r from-indigo-600 to-cyan-500 px-6 py-3 font-semibold text-white transition hover:scale-105">
-              Create Short URL
-            </button>
-          </div>
+          <div className="space-y-4">
+            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
+              <p className="truncate text-sm text-slate-500">
+                https://www.example.com/very-long-product-page
+              </p>
 
-          <div className="mt-6 rounded-lg border border-slate-800 bg-slate-950 p-4">
-            <p className="text-sm text-slate-400">Example</p>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="font-medium text-cyan-400">
+                  short.ly/aBc123
+                </span>
 
-            <div className="mt-2 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-              <span className="truncate text-slate-500">
-                https://www.example.com/very-long-url-with-many-parameters
-              </span>
+                <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-400">
+                  248 Clicks
+                </span>
+              </div>
+            </div>
 
-              <span className="font-medium text-cyan-400">
-                short.ly/aBc123
-              </span>
+            <div className="rounded-xl border border-slate-800 bg-slate-950 p-4">
+              <p className="truncate text-sm text-slate-500">
+                https://github.com/example/project
+              </p>
+
+              <div className="mt-3 flex items-center justify-between">
+                <span className="font-medium text-cyan-400">
+                  short.ly/xYz789
+                </span>
+
+                <span className="rounded-full bg-blue-500/10 px-3 py-1 text-xs text-blue-400">
+                  Analytics Enabled
+                </span>
+              </div>
             </div>
           </div>
         </div>
