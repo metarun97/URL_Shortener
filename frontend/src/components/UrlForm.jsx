@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { createShortUrl } from '../apis/createShortUrl.api.js';
+import { Link2, Sparkles } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
-import { Link2, Sparkles } from 'lucide-react';
+import { createShortUrl } from '../apis/createShortUrl.api.js';
 
 const UrlForm = () => {
   const [urlValue, seturlValue] = useState('');
@@ -27,11 +27,11 @@ const UrlForm = () => {
       <form onSubmit={submitHandler} className="space-y-6">
         {/* Heading */}
         <div className="text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-r from-indigo-600 to-cyan-500">
             <Sparkles className="h-7 w-7 text-white" />
           </div>
 
-          <h2 className="text-3xl font-bold text-white">Create Short URL</h2>
+          <h2 className="text-3xl font-bold text-[#00A5E1]">Create Short URL</h2>
 
           <p className="mt-2 text-slate-400">
             Paste your long URL below and generate a secure short link
@@ -66,7 +66,7 @@ const UrlForm = () => {
         {/* Submit */}
         <button
           type="submit"
-          className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 py-3.5 font-semibold text-white transition duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-indigo-500/30 active:scale-[0.98]"
+          className="w-full rounded-xl bg-linear-to-r from-indigo-600 to-cyan-500 py-3.5 font-semibold text-white transition duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-indigo-500/30 active:scale-[0.98]"
         >
           Shorten URL
         </button>

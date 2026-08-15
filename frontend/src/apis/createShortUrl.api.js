@@ -1,6 +1,6 @@
-// import axios from "axios"
 import axiosInstance from "../utils/axiosInstance.js";
 
+/* Create shortUrl for user */
 export const createShortUrl = async (url) => {
   const res = await axiosInstance.post('/api/url/create', {
     full_url: url,

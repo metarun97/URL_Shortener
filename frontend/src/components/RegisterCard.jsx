@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { registerUser } from '../apis/createUser.api.js';
+import { registerUser } from '../apis/authUser.api.js';
 import { toast } from 'react-toastify';
 import { Link } from '@tanstack/react-router';
 
@@ -106,7 +106,7 @@ const RegisterCard = () => {
         {/* Button */}
         <button
           type="submit"
-          className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 py-3 font-semibold text-white transition hover:scale-[1.02] hover:shadow-lg hover:shadow-indigo-500/30"
+          className="w-full rounded-xl bg-linear-to-r from-indigo-600 to-cyan-500 py-3 font-semibold text-white transition hover:scale-[1.02] hover:shadow-lg hover:shadow-indigo-500/30"
         >
           Login
         </button>

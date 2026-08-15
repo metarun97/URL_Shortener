@@ -70,7 +70,7 @@ export const loginUser = async (req, res) => {
     // If user not found:-
     if (!user) {
       return res.status(401).json({
-        message: 'Invalid credential:Email not matched'
+        message: 'Invalid User: Email not found',
       });
     }
 
@@ -80,7 +80,7 @@ export const loginUser = async (req, res) => {
     // If password not matched:-
     if (!isPasswordMatch) {
       return res.status(401).json({
-        message: 'Invalid credential:Password not matched'
+        message: 'Invalid credential: Email or Password not matched'
       });
     }
 

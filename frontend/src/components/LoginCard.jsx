@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { loginUser } from '../apis/createUser.api';
+import { loginUser } from '../apis/authUser.api';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../store/slice/authSlice';
@@ -93,7 +93,7 @@ const LoginCard = () => {
         {/* Button */}
         <button
           type="submit"
-          className="w-full rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 py-3 font-semibold text-white transition hover:scale-[1.02] hover:shadow-lg hover:shadow-indigo-500/30"
+          className="w-full rounded-xl bg-linear-to-r from-indigo-600 to-cyan-500 py-3 font-semibold text-white transition hover:scale-[1.02] hover:shadow-lg hover:shadow-indigo-500/30"
         >
           Login
         </button>

@@ -1,7 +1,7 @@
 /* Imported items */
 import { store } from "../store/store"
 import { redirect } from "@tanstack/react-router";
-import { currentUser } from "../apis/createUser.api";
+import { currentUser } from "../apis/authUser.api";
 import { login } from "../store/slice/authSlice";
 
 //* Auth check function for authenticated user:-

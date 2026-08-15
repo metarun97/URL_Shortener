@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router';
 
 const Hero = () => {
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+    <section className="relative overflow-hidden bg-linear-to-br from-slate-950 via-slate-900 to-indigo-950">
       {/* Background Blur */}
       <div className="absolute -top-32 left-0 h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl"></div>
       <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-cyan-500/20 blur-3xl"></div>
@@ -16,7 +16,7 @@ const Hero = () => {
         {/* Heading */}
         <h1 className="max-w-4xl text-5xl font-extrabold leading-tight tracking-tight text-white md:text-7xl">
           Shorten, Manage &
-          <span className="block bg-gradient-to-r from-indigo-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent">
+          <span className="block bg-linear-to-r from-indigo-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent">
             Track Every Link
           </span>
         </h1>

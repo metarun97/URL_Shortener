@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { loginUser } from '../apis/createUser.api.js';
+import { loginUser } from '../apis/authUser.api.js';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../store/slice/authSlice.js';
@@ -14,10 +14,12 @@ const LoginForm = () => {
     reset,
   } = useForm();
 
+  console.log(errors);
+  // console.log(formState);
+
   const auth = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  // console.log(auth);
 
   /* Login handler */
   const loginHandler = async (data) => {
@@ -25,14 +27,15 @@ const LoginForm = () => {
       const { email, password } = data;
       const loginData = await loginUser(email, password);
       const user = loginData?.user || loginData;
+
       dispatch(login(user));
       navigate({ to: '/dashboard', replace: true });
       toast.success('User loggedIn successfully✅');
       reset();
     } catch (error) {
-      setError('root.serverError', {
+      setError('root', {
         type: 'server',
-        message: error.response?.data?.message || 'Login failed',
+        message: user?.message || "Login failed",
       });
     }
   };
@@ -47,6 +50,10 @@ const LoginForm = () => {
         <p className="text-gray-500 text-center mt-2">Login to continue</p>
 
         <form onSubmit={handleSubmit(loginHandler)} className="mt-8 space-y-5">
+          {/* Errors */}
+          {errors.root && (
+            <p className="text-red-500 text-sm">{errors.root.message}</p>
+          )}
           {/* Email */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">
@@ -63,19 +70,7 @@ const LoginForm = () => {
                   message: 'Please enter a valid email',
                 },
               })}
-              className={`w-full rounded-lg border px-4 py-3 outline-none transition
-      ${
-        errors.email
-          ? 'border-red-500 focus:ring-red-200'
-          : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
-      }`}
             />
-
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.email.message}
-              </p>
-            )}
           </div>
 
           {/* Password */}
@@ -94,19 +89,7 @@ const LoginForm = () => {
                   message: 'Password must be at least 6 characters',
                 },
               })}
-              className={`w-full rounded-lg border px-4 py-3 outline-none transition
-      ${
-        errors.password
-          ? 'border-red-500 focus:ring-red-200'
-          : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
-      }`}
             />
-
-            {errors.password && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.password.message}
-              </p>
-            )}
           </div>
 
           {/* Login Button */}
@@ -135,7 +118,3 @@ const LoginForm = () => {
 };
 
 export default LoginForm;
-
-
-
-
