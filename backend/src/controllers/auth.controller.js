@@ -1,3 +1,4 @@
+/* Imported items */
 import userModel from '../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -32,15 +33,26 @@ export const registerUser = async (req, res) => {
       avatar: gravatarCreated,
     });
 
-    // Give token to registered user:-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    // Give accessToken to registered user:-
+    const accessToken = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
 
-    // Save token in browser's cookies:-
-    res.cookie("token", token, {
+    // Give refreshToken to registered user:-
+    const refreshToken = jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
+
+    // Save accessToken in browser's cookies:-
+    res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 1000   // 1 hour
+      maxAge: 15 * 60 * 1000   // 15 minutes
+    })
+
+    // Save refreshToken in browser's cookies:-
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000   // 7 days
     })
 
     // Final response:-
@@ -55,7 +67,9 @@ export const registerUser = async (req, res) => {
     });
   } catch (error) {
     // console.error('Register error:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    return res.status(500).json({
+      message: error.message
+    });
   }
 }
 
@@ -70,7 +84,7 @@ export const loginUser = async (req, res) => {
     // If user not found:-
     if (!user) {
       return res.status(401).json({
-        message: 'Invalid User: Email not found',
+        message: 'Invalid Email: User not found',
       });
     }
 
@@ -80,21 +94,23 @@ export const loginUser = async (req, res) => {
     // If password not matched:-
     if (!isPasswordMatch) {
       return res.status(401).json({
-        message: 'Invalid credential: Email or Password not matched'
+        message: 'Invalid credential: Password not matched'
       });
     }
 
-    // Give a token to login user:-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    // Give accessToken to login user:-
+    const accessToken = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
 
-    // Save token for the login user:-
-    res.cookie('token', token, {
+    // Give refreshToken to login user:-
+    const refreshToken = jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
+
+    // Get refreshToken in browser's cookies:-
+    res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 1000   // 1 hour
-    });
-
+      maxAge: 7 * 24 * 60 * 60 * 1000   // 7 days
+    })
     // Final response:-
     res.status(200).json({
       message: 'User logged in successfully',
@@ -135,18 +151,19 @@ export const meUser = async (req, res) => {
 // logoutUser API Controller:-
 export const logoutUser = async (req, res) => {
   try {
-    const token = req.cookies.token;
+    const refreshToken = req.cookies.refreshToken;
 
-    if (!token) {
+    if (!refreshToken) {
       return res.status(404).json({
         message: "Login user not found"
       })
     }
 
     // Clear cookie form the browser:-
-    res.clearCookie("token", {
+    res.clearCookie("refreshToken", {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
     })
 
     // Final response:-
