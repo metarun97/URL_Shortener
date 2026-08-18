@@ -75,6 +75,41 @@ export const redirectShortUrl = async (req, res) => {
   }
 }
 
+
+//* deleteSingleUrl API Controller:-
+export const deleteUrl = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    /* Find url by it's id and user */
+    const url = await urlModel.findOne({
+      _id: id,
+      user: userId
+    })
+
+    if (!url) {
+      return res.status(404).json({
+        message: "Url not found & you are not authorized to delete it",
+      })
+    }
+
+    /* Delete that url which id matched  */
+    await urlModel.deleteOne({ _id: id });
+
+    /* Final response */
+    res.status(200).json({
+      messsage: "Url deleted successfully",
+    })
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    })
+  }
+}
+
+
+
 //* getAllUsersUrl API Controller:-
 export const getAllUsersUrl = async (req, res) => {
   try {
@@ -100,3 +135,5 @@ export const getAllUsersUrl = async (req, res) => {
     });
   }
 }
+
+
