@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { userAllUrls } from '../apis/getUsersAllUrls';
+import { userAllUrls } from '../apis/userUrl.api';
 
 export const useUsersUrls = () => {
   const query = useQuery({

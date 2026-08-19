@@ -2,23 +2,29 @@ import { useState } from 'react';
 import { Link2, Sparkles } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
-import { createShortUrl } from '../apis/createShortUrl.api.js';
+import { createShortUrl } from './../../apis/userUrl.api';
 
 const UrlForm = () => {
   const [urlValue, seturlValue] = useState('');
   const [shortUrlVal, setShortUrlVal] = useState('');
   const [copied, setCopied] = useState(false);
+  const [serverError, setServerError] = useState('');
   const queryClient = useQueryClient();
 
   /* submitHandler Function */
   const submitHandler = async (e) => {
     e.preventDefault();
-
-    const shortUrl = await createShortUrl(urlValue);
-    setShortUrlVal(shortUrl);
-    queryClient.invalidateQueries({ queryKey: ['user-allUrls'] });
-    seturlValue('');
-    toast.success('Short url created', { autoClose: 1000 });
+    try {
+      const shortUrl = await createShortUrl(urlValue);
+      setShortUrlVal(shortUrl);
+      queryClient.invalidateQueries({ queryKey: ['user-allUrls'] });
+      seturlValue('');
+      toast.success('Short url created', { autoClose: 1000 });
+    } catch (error) {
+      setServerError(
+        error?.message || 'Something went wrong',
+      );
+    }
   };
 
   return (
@@ -31,14 +37,15 @@ const UrlForm = () => {
             <Sparkles className="h-7 w-7 text-white" />
           </div>
 
-          <h2 className="text-3xl font-bold text-[#00A5E1]">Create Short URL</h2>
+          <h2 className="text-3xl font-bold text-[#00A5E1]">
+            Create Short URL
+          </h2>
 
           <p className="mt-2 text-slate-400">
             Paste your long URL below and generate a secure short link
             instantly.
           </p>
         </div>
-
         {/* URL Input */}
         <div>
           <label
@@ -62,11 +69,17 @@ const UrlForm = () => {
             />
           </div>
         </div>
+        {/* Error Message */}
+        {serverError && (
+          <div className="mt-2 w-full rounded-xl border border-red-500/50 bg-red-500/10 px-4 py-3">
+            <p className="text-sm font-medium text-red-400">{serverError}</p>
+          </div>
+        )}
 
         {/* Submit */}
         <button
           type="submit"
-          className="w-full rounded-xl bg-linear-to-r from-indigo-600 to-cyan-500 py-3.5 font-semibold text-white transition duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-indigo-500/30 active:scale-[0.98]"
+          className="w-full rounded-xl bg-linear-to-r from-indigo-600 to-cyan-500 py-3.5 font-semibold text-white transition duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-indigo-500/30 active:scale-[0.98] cursor-pointer"
         >
           Shorten URL
         </button>

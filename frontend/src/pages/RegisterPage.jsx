@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import RegisterCard from '../components/RegisterCard.jsx';
+import RegisterCard from '../components/UI/RegisterCard';
 
 const RegisterPage = () => {
   return (

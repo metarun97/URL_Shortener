@@ -2,7 +2,7 @@
 import express from 'express';
 import { registerUser, loginUser, meUser, logoutUser } from '../controllers/auth.controller.js';
 import { loginUserValidation, registerUserValidation } from '../middlewares/authValidator.middleware.js';
-import { authenticationPass } from '../middlewares/auth.middleware.js';
+import { authPassByRefreshToken } from '../middlewares/auth.middleware.js';
 
 /* Router created */
 const router = express.Router();
@@ -14,7 +14,7 @@ router.post("/register", registerUserValidation, registerUser);
 router.post("/login", loginUserValidation, loginUser);
 
 /*   /api/auth/me Endpoint   */
-router.get("/me", authenticationPass, meUser)
+router.get("/me", authPassByRefreshToken, meUser)
 
 /*   /api/auth/logout Endpoint   */
 router.post("/logout", logoutUser);

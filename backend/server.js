@@ -16,6 +16,14 @@ connectToDb();
 
 const port = process.env.PORT || 3000;
 
+
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Server is healthy",
+  });
+});
+
 /* Server started */
 app.listen(3000, () => {
   console.log(`Server is running on port http://localhost:${port}`);

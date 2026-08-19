@@ -2,19 +2,19 @@
 import jwt from "jsonwebtoken";
 
 // authenticationPass for pass the authenticated user:-
-export const authenticationPass = async (req, res, next) => {
-  const token = req.cookies.token;
+export const authPassByRefreshToken = async (req, res, next) => {
+  const refreshToken = req?.cookies?.refreshToken;
 
   // If token not found:-
-  if (!token) {
+  if (!refreshToken) {
     return res.status(404).json({
-      message: "Unotherized: Token not found",
+      message: "Unotherized: refreshToken not found",
     })
   }
 
   try {
     // Verify token and get user data and pass data to req.user:-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
 
     // set user as decoded data:-
     const user = decoded;

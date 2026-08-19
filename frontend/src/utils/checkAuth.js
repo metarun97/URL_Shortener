@@ -10,7 +10,7 @@ export const checkAuth = async ({ context }) => {
     /* These two values  come from context in main file   */
     const { queryClient, store } = context;
 
-    /* Check if user is presemt in cache give value if not call api & same in cache */
+    /* Check if user is present in cache give value if not call api & save in cache */
     const user = await queryClient.ensureQueryData({
       queryKey: ["currentUser"],
       queryFn: currentUser,

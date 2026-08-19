@@ -1,7 +1,7 @@
 // Imported items:-
 import express from "express";
-import { createShortUrl, getAllUsersUrl, redirectShortUrl } from "../controllers/url.controller.js";
-import { authenticationPass } from '../middlewares/auth.middleware.js';
+import { createShortUrl, deleteUrl, getAllUsersUrl, redirectShortUrl } from "../controllers/url.controller.js";
+import { authPassByRefreshToken } from '../middlewares/auth.middleware.js';
 import { createShortUrlValidation } from "../middlewares/authValidator.middleware.js";
 
 
@@ -10,10 +10,13 @@ const router = express.Router();
 
 
 /* /api/url/create Endpoint */
-router.post("/create", authenticationPass, createShortUrlValidation, createShortUrl);
+router.post("/create", authPassByRefreshToken, createShortUrlValidation, createShortUrl);
 
 /* /api/url/myAllUrls Endpoint */
-router.get("/myAllUrls", authenticationPass, getAllUsersUrl);
+router.get("/myAllUrls", authPassByRefreshToken, getAllUsersUrl);
+
+/* /api/url/:id Endpoint */
+router.delete("/:id", authPassByRefreshToken, deleteUrl);
 
 /* /api/url/:shortedId redirect Endpoint */
 router.get("/:shortedId", redirectShortUrl);

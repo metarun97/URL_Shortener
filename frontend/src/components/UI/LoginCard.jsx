@@ -1,9 +1,9 @@
 import { useForm } from 'react-hook-form';
-import { loginUser } from '../apis/authUser.api';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../store/slice/authSlice';
+import { login } from '../../store/slice/authSlice';
 import { Link, useNavigate } from '@tanstack/react-router';
+import { loginUser } from '../../apis/authUser.api';
 
 const LoginCard = () => {
   const {
@@ -13,6 +13,8 @@ const LoginCard = () => {
     formState: { errors },
     reset,
   } = useForm();
+
+  // console.log(errors?.serverError?.message);
 
   const auth = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -29,9 +31,9 @@ const LoginCard = () => {
       toast.success('User loggedIn successfully✅');
       reset();
     } catch (error) {
-      setError('root.serverError', {
+      setError('serverError', {
         type: 'server',
-        message: error.response?.data?.message || 'Login failed',
+        message: error?.message,
       });
     }
   };
@@ -43,24 +45,20 @@ const LoginCard = () => {
     >
       <h2 className="mb-8 text-center text-3xl font-bold text-white">Login</h2>
 
-      <form className="space-y-5">
+      <form onSubmit={handleSubmit(loginHandler)} className="space-y-5">
         {/* Email */}
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-300">
             Email
           </label>
 
-          <div className="flex items-center rounded-xl border border-slate-700 bg-slate-950 px-4 focus-within:border-indigo-500">
+          <div className="flex items-center rounded-xl border bg-slate-950 px-4">
             <input
               type="email"
               placeholder="Enter your email"
               className="w-full bg-transparent px-3 py-3 text-white placeholder:text-slate-500 outline-none"
               {...register('email', {
                 required: 'Email is required',
-                pattern: {
-                  value: /^\S+@\S+\.\S+$/,
-                  message: 'Please enter a valid email',
-                },
               })}
             />
           </div>
@@ -68,32 +66,32 @@ const LoginCard = () => {
 
         {/* Password */}
         <div>
-          <div className="mb-2 flex items-center justify-between">
-            <label className="text-sm font-medium text-slate-300">
-              Password
-            </label>
-          </div>
+          <label className="mb-2 block text-sm font-medium text-slate-300">
+            Password
+          </label>
 
-          <div className="flex items-center rounded-xl border border-slate-700 bg-slate-950 px-4 focus-within:border-indigo-500">
+          <div className="flex items-center rounded-xl border bg-slate-950 px-4 ">
             <input
               type="password"
               placeholder="Enter your password"
               className="w-full bg-transparent px-3 py-3 text-white placeholder:text-slate-500 outline-none"
               {...register('password', {
                 required: 'Password is required',
-                minLength: {
-                  value: 6,
-                  message: 'Password must be at least 6 characters',
-                },
               })}
             />
           </div>
         </div>
 
-        {/* Button */}
+        {/* COMMON ERROR SECTION */}
+        {errors?.serverError?.message && (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
+            {errors?.serverError?.message}
+          </div>
+        )}
+
         <button
           type="submit"
-          className="w-full rounded-xl bg-linear-to-r from-indigo-600 to-cyan-500 py-3 font-semibold text-white transition hover:scale-[1.02] hover:shadow-lg hover:shadow-indigo-500/30"
+          className="w-full rounded-xl bg-linear-to-r from-indigo-600 to-cyan-500 py-3 font-semibold text-white"
         >
           Login
         </button>

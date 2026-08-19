@@ -1,17 +1,21 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
-import { useUsersUrls } from '../utils/usersUrls';
+import { useUsersUrls } from '../../utils/usersUrls';
 import { useState } from 'react';
-import { baseUrlForUrls } from './../config/config';
-import { FiCheck, FiCopy, FiExternalLink } from 'react-icons/fi';
+import { baseUrlForUrls } from '../../config/config';
+import { FiCheck, FiCopy, FiExternalLink, FiTrash2 } from 'react-icons/fi';
 import { CalendarDays, Link2, MousePointerClick } from 'lucide-react';
+import { Link } from '@tanstack/react-router';
+import UrlSkeleton from '../skeleton/UrlSkeleton';
+import { deleteSingleUrl } from '../../apis/userUrl.api';
+import { toast } from 'react-toastify';
 
 const UserUrls = () => {
   const [copiedId, setCopiedId] = useState(null);
   const { data, isLoading, isError, error } = useUsersUrls();
+  const queryClient = useQueryClient();
 
-  console.log(data);
-
+  /* Copy to clipboard */
   const copyToClipboard = async (shortUrl, id) => {
     try {
       await navigator.clipboard.writeText(shortUrl);
@@ -26,10 +30,21 @@ const UserUrls = () => {
     }
   };
 
+  /* Delete a single url */
+  const deleteUrlHandler = async (urlId) => {
+    // console.log(data);
+    await deleteSingleUrl(urlId);
+    queryClient.invalidateQueries({ queryKey: ['user-allUrls'] });
+
+    toast.success('Url deleted successfully', { autoClose: 900 });
+  };
+
+  /* If loading then show skeleton loader or user urls */
   if (isLoading) {
-    return <div className="text-center mt-10 text-lg">Loading URLs...</div>;
+    return <UrlSkeleton />;
   }
 
+  /* If error then show error */
   if (isError) {
     return (
       <div className="text-center mt-10 text-red-500">
@@ -38,8 +53,9 @@ const UserUrls = () => {
     );
   }
 
-  const urls = data?.data || [];
+  const urls = data?.urls || [];
 
+  /* If length is zero of url array */
   if (data.urls.length === 0) {
     return (
       <div className="text-center mt-10 text-gray-500">
@@ -95,6 +111,9 @@ const UserUrls = () => {
                   <th className="p-5 text-left text-sm font-semibold text-slate-300">
                     Short URL
                   </th>
+                  <th className="p-5 text-center text-sm font-semibold text-slate-300">
+                    Actions
+                  </th>
                 </tr>
               </thead>
 
@@ -109,16 +128,15 @@ const UserUrls = () => {
                     >
                       {/* Original URL */}
                       <td className="max-w-md p-5">
-                        <a
-                          href={url.full_url}
+                        <Link
+                          to={url.full_url}
                           target="_blank"
-                          rel="noreferrer"
                           className="flex items-center gap-2 text-sm text-indigo-400 hover:text-indigo-300 hover:underline"
                         >
                           <span className="truncate">{url.full_url}</span>
 
                           <FiExternalLink className="shrink-0" />
-                        </a>
+                        </Link>
                       </td>
 
                       {/* Clicks */}
@@ -141,19 +159,18 @@ const UserUrls = () => {
                       {/* Short URL */}
                       <td className="p-5">
                         <div className="flex items-center gap-3">
-                          <a
-                            href={shortUrl}
+                          <Link
+                            to={shortUrl}
                             target="_blank"
-                            rel="noreferrer"
                             className="min-w-0 flex-1 truncate text-sm font-medium text-cyan-400 hover:text-cyan-300 hover:underline"
                           >
                             {shortUrl}
-                          </a>
+                          </Link>
 
                           <button
                             type="button"
                             onClick={() => copyToClipboard(shortUrl, url._id)}
-                            className="flex shrink-0 items-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-3 py-2 text-sm font-medium text-indigo-400 transition hover:bg-indigo-500/20"
+                            className="flex shrink-0 items-center gap-2 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-3 py-2 text-sm font-medium text-indigo-400 transition hover:bg-indigo-500/20 cursor-pointer"
                           >
                             {copiedId === url._id ? (
                               <>
@@ -168,6 +185,17 @@ const UserUrls = () => {
                             )}
                           </button>
                         </div>
+                      </td>
+                      {/* Actions */}
+                      <td className="p-5 text-center">
+                        <button
+                          type="button"
+                          onClick={() => deleteUrlHandler(url?._id)}
+                          className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-400 transition hover:bg-red-500/20 hover:text-red-300"
+                        >
+                          <FiTrash2 size={16} />
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   );

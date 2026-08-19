@@ -12,6 +12,7 @@ const app = express();
 /* Remove cors error */
 app.use(cors({
   origin: "http://localhost:5173", // Vite-React
+  // origin: "http://localhost:4173", // Vite-React-build
   credentials: true,
 }));
 

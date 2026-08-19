@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
-import { registerUser } from '../apis/authUser.api.js';
 import { toast } from 'react-toastify';
 import { Link } from '@tanstack/react-router';
+import { registerUser } from './../../apis/authUser.api';
 
 const RegisterCard = () => {
   const {
@@ -20,9 +20,9 @@ const RegisterCard = () => {
       toast.success('User registered successfully✅');
       reset();
     } catch (error) {
-      setError('root.serverError', {
+      setError('serverError', {
         type: 'server',
-        message: error.response?.data?.message || 'Register failed',
+        message: error?.message,
       });
     }
   };
@@ -32,48 +32,41 @@ const RegisterCard = () => {
       onSubmit={handleSubmit(registerHandler)}
       className="rounded-3xl border border-slate-800 bg-slate-900/70 p-8 shadow-2xl backdrop-blur-xl"
     >
-      <h2 className="mb-8 text-center text-3xl font-bold text-white">Login</h2>
+      <h2 className="mb-8 text-center text-3xl font-bold text-white">
+        Register
+      </h2>
 
-      <form className="space-y-5">
-        {/* Email */}
+      <form onSubmit={handleSubmit(registerHandler)} className="space-y-5">
+        {/* Name */}
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-300">
             Name
           </label>
 
-          <div className="flex items-center rounded-xl border border-slate-700 bg-slate-950 px-4 focus-within:border-indigo-500">
+          <div className="flex items-center rounded-xl border bg-slate-950 px-4">
             <input
-              type="text"
+              type="name"
               placeholder="Enter your name"
               className="w-full bg-transparent px-3 py-3 text-white placeholder:text-slate-500 outline-none"
               {...register('name', {
                 required: 'Name is required',
-                minLength: {
-                  value: 2,
-                  message: 'Name must be at least 2 characters',
-                },
               })}
             />
           </div>
         </div>
-
         {/* Email */}
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-300">
             Email
           </label>
 
-          <div className="flex items-center rounded-xl border border-slate-700 bg-slate-950 px-4 focus-within:border-indigo-500">
+          <div className="flex items-center rounded-xl border bg-slate-950 px-4">
             <input
               type="email"
               placeholder="Enter your email"
               className="w-full bg-transparent px-3 py-3 text-white placeholder:text-slate-500 outline-none"
               {...register('email', {
                 required: 'Email is required',
-                pattern: {
-                  value: /^\S+@\S+\.\S+$/,
-                  message: 'Please enter a valid email',
-                },
               })}
             />
           </div>
@@ -81,32 +74,32 @@ const RegisterCard = () => {
 
         {/* Password */}
         <div>
-          <div className="mb-2 flex items-center justify-between">
-            <label className="text-sm font-medium text-slate-300">
-              Password
-            </label>
-          </div>
+          <label className="mb-2 block text-sm font-medium text-slate-300">
+            Password
+          </label>
 
-          <div className="flex items-center rounded-xl border border-slate-700 bg-slate-950 px-4 focus-within:border-indigo-500">
+          <div className="flex items-center rounded-xl border bg-slate-950 px-4 ">
             <input
               type="password"
               placeholder="Enter your password"
               className="w-full bg-transparent px-3 py-3 text-white placeholder:text-slate-500 outline-none"
               {...register('password', {
                 required: 'Password is required',
-                minLength: {
-                  value: 6,
-                  message: 'Password must be at least 6 characters',
-                },
               })}
             />
           </div>
         </div>
 
-        {/* Button */}
+        {/* COMMON ERROR SECTION */}
+        {errors?.serverError?.message && (
+          <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
+            {errors?.serverError?.message}
+          </div>
+        )}
+
         <button
           type="submit"
-          className="w-full rounded-xl bg-linear-to-r from-indigo-600 to-cyan-500 py-3 font-semibold text-white transition hover:scale-[1.02] hover:shadow-lg hover:shadow-indigo-500/30"
+          className="w-full rounded-xl bg-linear-to-r from-indigo-600 to-cyan-500 py-3 font-semibold text-white"
         >
           Login
         </button>
