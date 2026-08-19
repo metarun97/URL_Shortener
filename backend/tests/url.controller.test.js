@@ -2,6 +2,7 @@ import { jest } from '@jest/globals';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import urlModel from '../src/models/url.model.js';
+import '../src/models/user.model.js';
 import { getAllUsersUrl } from '../src/controllers/url.controller.js';
 
 let mongoServer;

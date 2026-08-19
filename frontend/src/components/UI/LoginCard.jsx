@@ -14,8 +14,6 @@ const LoginCard = () => {
     reset,
   } = useForm();
 
-  // console.log(errors?.serverError?.message);
-
   const auth = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -27,9 +25,12 @@ const LoginCard = () => {
       const loginData = await loginUser(email, password);
       const user = loginData?.user || loginData;
       dispatch(login(user));
-      navigate({ to: '/dashboard', replace: true });
-      toast.success('User loggedIn successfully✅');
+      // toast.success('User loggedIn successfully✅');
       reset();
+      navigate({
+        to: '/dashboard',
+        replace: true,
+      });
     } catch (error) {
       setError('serverError', {
         type: 'server',
@@ -39,10 +40,7 @@ const LoginCard = () => {
   };
 
   return (
-    <div
-      onSubmit={handleSubmit(loginHandler)}
-      className="rounded-3xl border border-slate-800 bg-slate-900/70 p-8 shadow-2xl backdrop-blur-xl"
-    >
+    <div className="rounded-3xl border border-slate-800 bg-slate-900/70 p-8 shadow-2xl backdrop-blur-xl">
       <h2 className="mb-8 text-center text-3xl font-bold text-white">Login</h2>
 
       <form onSubmit={handleSubmit(loginHandler)} className="space-y-5">

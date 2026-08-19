@@ -132,11 +132,16 @@ describe('auth controller', () => {
     await loginUser(req, res);
 
     expect(res.status).toHaveBeenCalledWith(401);
-    expect(res.json).toHaveBeenCalledWith({ message: 'Invalid credential:Password not matched' });
+    expect(res.json).toHaveBeenCalledWith({ message: 'Invalid credential: Password not matched' });
   });
 
   it('returns the current user from req.user', async () => {
-    const req = { user: { id: '123', name: 'Eve', email: 'eve@example.com' } };
+    const savedUser = await userModel.create({
+      name: 'Eve',
+      email: 'eve@example.com',
+      password: 'hashedpw',
+    });
+    const req = { user: { id: savedUser._id.toString() } };
     const res = buildRes();
 
     await meUser(req, res);
@@ -144,19 +149,23 @@ describe('auth controller', () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       message: 'User fetched successfully.',
-      user: req.user,
+      data: expect.objectContaining({
+        name: 'Eve',
+        email: 'eve@example.com',
+      }),
     });
   });
 
   it('clears the auth cookie on logout', async () => {
-    const req = {};
+    const req = { cookies: { refreshToken: 'refresh-token' } };
     const res = buildRes();
 
     await logoutUser(req, res);
 
-    expect(res.clearCookie).toHaveBeenCalledWith('token', {
+    expect(res.clearCookie).toHaveBeenCalledWith('refreshToken', {
       httpOnly: true,
-      secure: true,
+      secure: false,
+      sameSite: 'strict',
     });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({ message: 'User logout successfully' });

@@ -5,6 +5,12 @@ import jwt from 'jsonwebtoken';
 import generateGravatarUrl from '../utils/gravetar.js';
 
 
+const getAccessTokenSecret = () =>
+  process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET;
+
+const getRefreshTokenSecret = () =>
+  process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET;
+
 // registerUser API Controller:-
 export const registerUser = async (req, res) => {
   try {
@@ -33,17 +39,19 @@ export const registerUser = async (req, res) => {
       avatar: gravatarCreated,
     });
 
+
+
     // Give accessToken to registered user:-
-    const accessToken = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
+    const accessToken = jwt.sign({ id: user._id }, getAccessTokenSecret(), { expiresIn: "15m" });
 
     // Give refreshToken to registered user:-
-    const refreshToken = jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
+    const refreshToken = jwt.sign({ id: user._id }, getRefreshTokenSecret(), { expiresIn: "7d" });
 
     // Save accessToken in browser's cookies:-
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "strict",
       maxAge: 15 * 60 * 1000   // 15 minutes
     })
 
@@ -51,7 +59,7 @@ export const registerUser = async (req, res) => {
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000   // 7 days
     })
 
@@ -99,18 +107,31 @@ export const loginUser = async (req, res) => {
     }
 
     // Give accessToken to login user:-
-    const accessToken = jwt.sign({ id: user._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "15m" });
+    const accessToken = jwt.sign({ id: user._id },
+      getAccessTokenSecret(),
+      { expiresIn: "15m" });
 
     // Give refreshToken to login user:-
-    const refreshToken = jwt.sign({ id: user._id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: "7d" });
+    const refreshToken = jwt.sign({ id: user._id },
+      getRefreshTokenSecret()
+      , { expiresIn: "7d" });
+
+    // Get accessToken in browser's cookies:-
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000   // 15 minutes
+    })
 
     // Get refreshToken in browser's cookies:-
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000   // 7 days
     })
+
     // Final response:-
     res.status(200).json({
       message: 'User logged in successfully',
@@ -130,46 +151,105 @@ export const loginUser = async (req, res) => {
 
 // meUser API Controller:-
 export const meUser = async (req, res) => {
+  try {
+    const userId = req.user?.id;
 
-  const userId = req.user.id;
+    const user = await userModel.findById(userId);
 
-  const user = await userModel.findById(userId);
+    // If user not found:-
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      })
+    }
 
-  if (!user) {
-    return res.status(404).json({
-      message: "User not found",
+    // Final response to find user:-
+    res.status(200).json({
+      message: "User fetched successfully.",
+      data: user,
+    })
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
     })
   }
-
-  // Final response to find user:-
-  res.status(200).json({
-    message: "User fetched successfully.",
-    data: user,
-  })
 }
 
 // logoutUser API Controller:-
 export const logoutUser = async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
+    const accessToken = req.cookies?.accessToken;
+    const refreshToken = req.cookies?.refreshToken;
 
-    if (!refreshToken) {
-      return res.status(404).json({
-        message: "Login user not found"
-      })
+    if (!accessToken && !refreshToken) {
+      return res.status(401).json({
+        success: true,
+        message: "accessToken/refreshTheToken not fond",
+      });
     }
 
-    // Clear cookie form the browser:-
-    res.clearCookie("refreshToken", {
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-    })
+    };
 
-    // Final response:-
-    res.status(200).json({
+    // Clear accessToken and refreshToken from the HTTP cookies.
+    res.clearCookie("accessToken", cookieOptions);
+    res.clearCookie("refreshToken", cookieOptions);
+
+    return res.status(200).json({
       message: "User logout successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
     })
+  }
+}
+
+// refreshTheToken API Controller:-
+export const refreshTheToken = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    // Check refresh token availability:-
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Refresh token required",
+      });
+    }
+
+    // Verify refreshTheToken:=
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    // Create new accessToken:-
+    const newAccessToken = jwt.sign(
+      {
+        id: decoded.id,
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      {
+        expiresIn: "15m",
+      }
+    );
+
+    // Save new accessToken in http cookies:-
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 15 * 60 * 1000,
+    });
+
+    // Final response:=
+    res.status(200).json({
+      message: "Access token refreshed",
+    });
   } catch (error) {
     res.status(500).json({
       message: error.message,

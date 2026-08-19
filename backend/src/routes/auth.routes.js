@@ -1,6 +1,6 @@
 /* Imported elements */
 import express from 'express';
-import { registerUser, loginUser, meUser, logoutUser } from '../controllers/auth.controller.js';
+import { registerUser, loginUser, meUser, logoutUser, refreshTheToken } from '../controllers/auth.controller.js';
 import { loginUserValidation, registerUserValidation } from '../middlewares/authValidator.middleware.js';
 import { authPassByRefreshToken } from '../middlewares/auth.middleware.js';
 
@@ -18,5 +18,8 @@ router.get("/me", authPassByRefreshToken, meUser)
 
 /*   /api/auth/logout Endpoint   */
 router.post("/logout", logoutUser);
+
+/*   /api/auth/logout Endpoint   */
+router.post("/refresh", refreshTheToken);
 
 export default router;
