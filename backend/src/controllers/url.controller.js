@@ -1,8 +1,10 @@
 // Imported items:-
+// import { nanoid } from "nanoid";
+// import { generateNanoId } from "../utils/genrateUniqueId.js";
 import urlModel from "../models/url.model.js";
-import { nanoid } from "nanoid";
-import { generateNanoId } from "../utils/genrateUniqueId.js";
 import { createShortUrlService } from "../service/shortUrl.service.js";
+import redis from "../db/redis.js";
+
 
 //* createShortUrl API Controller:-
 export const createShortUrl = async (req, res) => {
@@ -47,11 +49,9 @@ export const createShortUrl = async (req, res) => {
 //* redirectShortUrl API Controller:-
 export const redirectShortUrl = async (req, res) => {
   try {
-    const { shortedId } = req.params;
+    const { shortedId } = req.params
 
-    // console.log(shortedId)
-
-    // find the url behalf or shortenId:-
+    // If redis not found then mongoDb:-
     const url = await urlModel.findOne({ short_url: shortedId });
 
     // if url not found:-
@@ -75,7 +75,6 @@ export const redirectShortUrl = async (req, res) => {
   }
 }
 
-
 //* deleteSingleUrl API Controller:-
 export const deleteUrl = async (req, res) => {
   try {
@@ -97,6 +96,10 @@ export const deleteUrl = async (req, res) => {
     /* Delete that url which id matched  */
     await urlModel.deleteOne({ _id: id });
 
+
+    // Remove from Redis
+    await redis.del(`url:${shortCode}`);
+
     /* Final response */
     res.status(200).json({
       messsage: "Url deleted successfully",
@@ -107,8 +110,6 @@ export const deleteUrl = async (req, res) => {
     })
   }
 }
-
-
 
 //* getAllUsersUrl API Controller:-
 export const getAllUsersUrl = async (req, res) => {
