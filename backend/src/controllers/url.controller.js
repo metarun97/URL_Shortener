@@ -1,9 +1,10 @@
 // Imported items:-
 // import { nanoid } from "nanoid";
 // import { generateNanoId } from "../utils/genrateUniqueId.js";
+import redisClient from "../db/redis.js";
 import urlModel from "../models/url.model.js";
 import { createShortUrlService } from "../service/shortUrl.service.js";
-import redis from "../db/redis.js";
+// import redis from "../db/redis.js";
 
 
 //* createShortUrl API Controller:-
@@ -51,6 +52,21 @@ export const redirectShortUrl = async (req, res) => {
   try {
     const { shortedId } = req.params
 
+    // Initailize cacheKey value by shortedId:-
+    const cacheKey = `url:${shortedId}`;
+
+    // Get CachedUrl from the redis cache:-
+    const cachedUrl = await redisClient.hGet(cacheKey, "full_url");
+
+    // CachedUrl value come from cache:-
+    if (cachedUrl) {
+      await redisClient.hIncrBy(cacheKey, "clicks", 1);
+      console.log("Redis HIT");
+      return res.redirect(cachedUrl);
+    }
+    // CachedUrl value not come from cache:-
+    console.log("Redis MISS");
+
     // If redis not found then mongoDb:-
     const url = await urlModel.findOne({ short_url: shortedId });
 
@@ -64,6 +80,15 @@ export const redirectShortUrl = async (req, res) => {
     // Increment in clicks:-
     url.clicks += 1;
     await url.save();
+
+    // set redisCache:-
+    await redisClient.hSet(cacheKey,
+      {
+        full_url: url.full_url,
+        clicks: String(url.clicks),
+      })
+
+
 
     // Redirect to the the url:-
     return res.redirect(url.full_url);

@@ -1,12 +1,9 @@
 /* Imported elements */
-import dotenv from "dotenv";
+import "dotenv/config";
 import app from './src/app.js';
 import dns from "dns";
 import connectToDb from './src/db/db.js';
-
-
-/* Configure env file data */
-dotenv.config();
+import { connectRedis } from "./src/db/redis.js";
 
 /* Set server dns menually */
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
@@ -14,9 +11,14 @@ dns.setServers(["1.1.1.1", "8.8.8.8"]);
 /* Connect to mongodDb database */
 connectToDb();
 
+// await connectRedis();
+// Getport from dotenv file:-
 const port = process.env.PORT || 3000;
 
+/* Connect to redis database */
+await connectRedis();
 
+/* Server started */
 app.get("/health", (req, res) => {
   res.status(200).json({
     success: true,
