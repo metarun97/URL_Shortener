@@ -77,9 +77,7 @@ export const redirectShortUrl = async (req, res) => {
       });
     }
 
-    // Increment in clicks:-
-    url.clicks += 1;
-    await url.save();
+
 
     // set redisCache:-
     await redisClient.hSet(cacheKey,
@@ -89,6 +87,12 @@ export const redirectShortUrl = async (req, res) => {
       })
 
 
+    // CacheKey expire set:-
+    await redisClient.expire(cacheKey, 60 * 60);
+
+    // Increment in clicks:-
+    url.clicks += 1;
+    await url.save();
 
     // Redirect to the the url:-
     return res.redirect(url.full_url);
@@ -121,9 +125,8 @@ export const deleteUrl = async (req, res) => {
     /* Delete that url which id matched  */
     await urlModel.deleteOne({ _id: id });
 
-
-    // Remove from Redis
-    await redis.del(`url:${shortCode}`);
+    /* Delete that url from the cache  */
+    await redisClient.del(`user:urls:${userId}`);
 
     /* Final response */
     res.status(200).json({
@@ -141,16 +144,41 @@ export const getAllUsersUrl = async (req, res) => {
   try {
     const userId = req?.user?.id;
 
+    // If userId not found:-
     if (!userId) {
       return res.status(401).json({
         message: "Unauthorized: User not found",
       });
     }
+    // create cachekey:-
+    const cacheKey = `user:urls${userId}`;
 
+    // Save cachekey as cachedUrls:-
+    const cachedUrls = await redisClient.get(cacheKey)
+
+    // If cachedUrls found then parse all the user's urls:-
+    if (cachedUrls) {
+      console.log("Redis HIT");
+
+      return res.status(200).json({
+        success: true,
+        urls: JSON.parse(cachedUrls),
+      });
+    }
+    console.log("Redis MISS");
+
+    // If urls found:-
     const urls = await urlModel
       .find({ user: userId })
-      .sort({ createdAt: -1 }).populate("user");
+      .sort({ createdAt: -1 }).populate("user").lean();
 
+
+    // Save data in redis cache:-
+    await redisClient.set(cacheKey, JSON.stringify(urls), {
+      EX: 60 * 5   // 5 minutes
+    })
+
+    // Final response:-
     return res.status(200).json({
       count: urls.length,
       urls,

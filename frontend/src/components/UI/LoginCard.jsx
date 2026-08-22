@@ -25,7 +25,7 @@ const LoginCard = () => {
       const loginData = await loginUser(email, password);
       const user = loginData?.user || loginData;
       dispatch(login(user));
-      toast.success('User loggedIn successfully✅'); r
+      toast.success('User loggedIn successfully✅');
       reset();
       navigate({
         to: '/dashboard',

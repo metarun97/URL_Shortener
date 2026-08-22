@@ -11,9 +11,7 @@ dns.setServers(["1.1.1.1", "8.8.8.8"]);
 /* Connect to mongodDb database */
 connectToDb();
 
-// await connectRedis();
-// Getport from dotenv file:-
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
 /* Connect to redis database */
 await connectRedis();
@@ -27,6 +25,6 @@ app.get("/health", (req, res) => {
 });
 
 /* Server started */
-app.listen(3000, () => {
-  console.log(`Server is running on port http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on port http://localhost:${PORT}`);
 })
