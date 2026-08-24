@@ -7,7 +7,6 @@ import { createShortUrl } from './../../apis/userUrl.api';
 const UrlForm = () => {
   const [urlValue, seturlValue] = useState('');
   const [shortUrlVal, setShortUrlVal] = useState('');
-  const [copied, setCopied] = useState(false);
   const [serverError, setServerError] = useState('');
   const queryClient = useQueryClient();
 
@@ -22,7 +21,7 @@ const UrlForm = () => {
       toast.success('Short url created', { autoClose: 1000 });
     } catch (error) {
       setServerError(
-        error?.message || 'Something went wrong',
+        error?.message,
       );
     }
   };
