@@ -3,7 +3,26 @@ import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import urlModel from '../src/models/url.model.js';
 import '../src/models/user.model.js';
-import { getAllUsersUrl } from '../src/controllers/url.controller.js';
+
+const redisClient = {
+  isOpen: false,
+  get: jest.fn(),
+  set: jest.fn(),
+  hGet: jest.fn(),
+  hSet: jest.fn(),
+  hIncrBy: jest.fn(),
+  expire: jest.fn(),
+  del: jest.fn(),
+};
+
+jest.unstable_mockModule('../src/db/redis.js', () => ({ default: redisClient }));
+
+const {
+  createShortUrl,
+  redirectShortUrl,
+  deleteUrl,
+  getAllUsersUrl,
+} = await import('../src/controllers/url.controller.js');
 
 let mongoServer;
 
@@ -14,6 +33,10 @@ beforeAll(async () => {
 
 afterEach(async () => {
   await urlModel.deleteMany({});
+  redisClient.isOpen = false;
+  Object.values(redisClient).forEach((method) => {
+    if (typeof method === 'function') method.mockReset();
+  });
   jest.clearAllMocks();
 });
 
@@ -25,6 +48,135 @@ afterAll(async () => {
 const buildRes = () => ({
   status: jest.fn().mockReturnThis(),
   json: jest.fn().mockReturnThis(),
+  redirect: jest.fn().mockReturnThis(),
+});
+
+describe('createShortUrl controller', () => {
+  it('returns 401 when the user is not authenticated', async () => {
+    const res = buildRes();
+
+    await createShortUrl({ body: { full_url: 'https://example.com' } }, res);
+
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.json).toHaveBeenCalledWith({
+      message: 'Unoutherized:User not found',
+    });
+  });
+
+  it('returns 409 when the URL already exists', async () => {
+    const userId = new mongoose.Types.ObjectId();
+    await urlModel.create({
+      full_url: 'https://example.com',
+      short_url: 'existing',
+      user: userId,
+    });
+    const res = buildRes();
+
+    await createShortUrl({
+      body: { full_url: 'https://example.com' },
+      user: { id: userId.toString() },
+    }, res);
+
+    expect(res.status).toHaveBeenCalledWith(409);
+    expect(res.json).toHaveBeenCalledWith({ message: 'URL alredy exists' });
+  });
+
+  it('creates a short URL for the authenticated user', async () => {
+    const userId = new mongoose.Types.ObjectId();
+    const res = buildRes();
+
+    await createShortUrl({
+      body: { full_url: 'https://example.com/new' },
+      user: { id: userId.toString() },
+    }, res);
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+      message: 'Short URL created successfully',
+      user: userId.toString(),
+      newUrl: expect.objectContaining({
+        full_url: 'https://example.com/new',
+        user: userId,
+      }),
+    }));
+  });
+});
+
+describe('redirectShortUrl controller', () => {
+  it('redirects from the Redis cache and increments cached clicks', async () => {
+    redisClient.isOpen = true;
+    redisClient.hGet.mockResolvedValue('https://example.com/cached');
+    const res = buildRes();
+
+    await redirectShortUrl({ params: { shortedId: 'cached1' } }, res);
+
+    expect(redisClient.hIncrBy).toHaveBeenCalledWith('url:cached1', 'clicks', 1);
+    expect(res.redirect).toHaveBeenCalledWith('https://example.com/cached');
+  });
+
+  it('returns 404 when the short URL does not exist', async () => {
+    redisClient.hGet.mockResolvedValue(null);
+    const res = buildRes();
+
+    await redirectShortUrl({ params: { shortedId: 'missing' } }, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({ message: 'URL not found' });
+  });
+
+  it('redirects from MongoDB and increments clicks on a cache miss', async () => {
+    const url = await urlModel.create({
+      full_url: 'https://example.com/database',
+      short_url: 'db12345',
+      user: new mongoose.Types.ObjectId(),
+      clicks: 2,
+    });
+    redisClient.hGet.mockResolvedValue(null);
+    redisClient.hSet.mockResolvedValue('OK');
+    redisClient.expire.mockResolvedValue(true);
+    const res = buildRes();
+
+    await redirectShortUrl({ params: { shortedId: 'db12345' } }, res);
+
+    expect(redisClient.hSet).toHaveBeenCalledWith('url:db12345', {
+      full_url: 'https://example.com/database',
+      clicks: '2',
+    });
+    expect(res.redirect).toHaveBeenCalledWith('https://example.com/database');
+    await expect(urlModel.findById(url._id)).resolves.toEqual(expect.objectContaining({ clicks: 3 }));
+  });
+});
+
+describe('deleteUrl controller', () => {
+  it('returns 404 when the URL does not belong to the user', async () => {
+    const res = buildRes();
+
+    await deleteUrl({
+      params: { id: new mongoose.Types.ObjectId().toString() },
+      user: { id: new mongoose.Types.ObjectId().toString() },
+    }, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.json).toHaveBeenCalledWith({
+      message: 'Url not found & you are not authorized to delete it',
+    });
+  });
+
+  it('deletes the URL and clears the user cache', async () => {
+    const userId = new mongoose.Types.ObjectId();
+    const url = await urlModel.create({
+      full_url: 'https://example.com/delete',
+      short_url: 'delete1',
+      user: userId,
+    });
+    const res = buildRes();
+
+    await deleteUrl({ params: { id: url._id.toString() }, user: { id: userId.toString() } }, res);
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(redisClient.del).toHaveBeenCalledWith(`user:urls:${userId}`);
+    await expect(urlModel.findById(url._id)).resolves.toBeNull();
+  });
 });
 
 describe('getAllUsersUrl controller', () => {
