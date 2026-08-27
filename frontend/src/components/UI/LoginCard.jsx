@@ -1,9 +1,9 @@
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../../store/slice/authSlice';
 import { Link, useNavigate } from '@tanstack/react-router';
 import { loginUser } from '../../apis/authUser.api';
+import { login } from '../../store/slice/authSlice';
 
 const LoginCard = () => {
   const {
@@ -14,7 +14,7 @@ const LoginCard = () => {
     reset,
   } = useForm();
 
-  const auth = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -31,6 +31,7 @@ const LoginCard = () => {
         to: '/dashboard',
         replace: true,
       });
+      c;
     } catch (error) {
       setError('serverError', {
         type: 'server',
