@@ -1,4 +1,3 @@
-import React from 'react';
 import UserUrls from './../components/UI/UserUrls';
 import UrlForm from './../components/UI/UrlForm';
 

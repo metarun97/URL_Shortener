@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link2, Sparkles } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { QueryClient, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { createShortUrl } from './../../apis/userUrl.api';
 
 const UrlForm = () => {
