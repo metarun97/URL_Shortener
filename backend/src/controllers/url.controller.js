@@ -1,6 +1,4 @@
 // Imported items:-
-// import { nanoid } from "nanoid";
-// import { generateNanoId } from "../utils/genrateUniqueId.js";
 import urlModel from "../models/url.model.js";
 import { createShortUrlService } from "../service/shortUrl.service.js";
 
