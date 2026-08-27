@@ -7,5 +7,5 @@ export const homepageRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
   component: HomePage,
-
+  beforeLoad: checkAuth,
 })
