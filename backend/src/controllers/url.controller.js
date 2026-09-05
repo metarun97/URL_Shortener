@@ -6,7 +6,7 @@ import { createShortUrlService } from "../service/shortUrl.service.js";
 //* createShortUrl API Controller:-
 export const createShortUrl = async (req, res) => {
   try {
-    const { full_url } = req.body;
+    const { originalUrl } = req.body;
     const userId = req?.user?.id;
 
     // if userId not found:-
@@ -16,8 +16,8 @@ export const createShortUrl = async (req, res) => {
       })
     }
 
-    // find existing url behalf of full_url:-
-    const urlExists = await urlModel.findOne({ full_url });
+    // find existing url behalf of originalUrl:-
+    const urlExists = await urlModel.findOne({ originalUrl });
 
     // if url already exists then conflict:-
     if (urlExists) {
@@ -27,13 +27,16 @@ export const createShortUrl = async (req, res) => {
     }
 
     // create newUrl for authenticated user:-
-    const newUrl = await createShortUrlService(full_url, userId);
+    const newUrl = await createShortUrlService(originalUrl, userId);
 
 
     // final response:-
     res.status(201).json({
       message: "Short URL created successfully",
-      newUrl: newUrl,
+      id: newUrl._id,
+      originalUrl: newUrl.originalUrl,
+      shortCode: newUrl.shortCode,
+      shortUrl: `${process.env.BASE_URL}/${newUrl.shortCode}`,
       user: userId,
     })
 
@@ -47,25 +50,56 @@ export const createShortUrl = async (req, res) => {
 //* redirectShortUrl API Controller:-
 export const redirectShortUrl = async (req, res) => {
   try {
-    const { shortedId } = req.params
+    const { shortCode } = req.params;
 
-    // If redis not found then mongoDb:-
-    const url = await urlModel.findOne({ short_url: shortedId });
+    // If Redis missing shortedId by MongoDb:-
+    const url = await urlModel.findOne({ shortCode });
 
     // if url not found:-
     if (!url) {
       return res.status(404).json({
-        message: "URL not found",
+        message: "Short URL not found",
       });
     }
 
-    // Increment in clicks:-
-    url.clicks += 1;
-    await url.save();
+    // Click count
+    await urlModel.updateOne(
+      { shortCode },
+      { $inc: { clicks: 1 } }
+    );
 
-    // Redirect to the the full_url of that short_url:-
-    return res.redirect(url.full_url);
+    return res.redirect(url.originalUrl);
 
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+}
+
+//* getAllUsersUrl API Controller:-
+export const userUrls = async (req, res) => {
+  try {
+    const userId = req?.user?.id;
+
+    // If userId not found means user Unauthorized:-
+    if (!userId) {
+      return res.status(401).json({
+        message: "Unauthorized: User not found",
+      });
+    }
+
+    // If urls not found in cache then get from mongoDB:-
+    const urls = await urlModel
+      .find({ user: userId })
+      .sort({ createdAt: -1 }).populate("user").lean();
+
+
+    // Final response:-
+    res.status(200).json({
+      count: urls.length,
+      urls
+    });
   } catch (error) {
     return res.status(500).json({
       message: error.message,
@@ -92,9 +126,10 @@ export const deleteUrl = async (req, res) => {
     }
 
     /* Delete that url which id matched  */
-    await urlModel.deleteOne({ _id: id });
-
-
+    await urlModel.findOneAndDelete({
+      _id: id,
+      user: userId
+    })
 
     /* Final response */
     res.status(200).json({
@@ -106,37 +141,5 @@ export const deleteUrl = async (req, res) => {
     })
   }
 }
-
-//* getAllUsersUrl API Controller:-
-export const getAllUsersUrl = async (req, res) => {
-  try {
-    const userId = req?.user?.id;
-
-    // If userId not found means user Unauthorized:-
-    if (!userId) {
-      return res.status(401).json({
-        message: "Unauthorized: User not found",
-      });
-    }
-
-    // If urls not found in cache then get from mongoDB:-
-    const urls = await urlModel
-      .find({ user: userId })
-      .sort({ createdAt: -1 }).populate("user").lean();
-
-
-    // Final response:-
-    return res.status(200).json({
-      count: urls.length,
-      urls,
-      source: "mongoDB"
-    });
-  } catch (error) {
-    return res.status(500).json({
-      message: error.message,
-    });
-  }
-}
-
 
 

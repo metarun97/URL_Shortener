@@ -50,9 +50,9 @@ export const loginUserValidation = [
   respondWithVelidationErrors
 ]
 
-
+// Login validation rules:-
 export const createShortUrlValidation = [
-  body("full_url")
+  body("originalUrl")
     .trim()
     .notEmpty()
     .withMessage("Original URL is required")
@@ -62,7 +62,7 @@ export const createShortUrlValidation = [
     })
     .withMessage("Please enter a valid URL (http:// or https://)"),
 
-  body("short_url")
+  body("shortCode")
     .optional()
     .trim()
     .isLength({ min: 4, max: 20 })

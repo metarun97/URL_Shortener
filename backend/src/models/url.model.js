@@ -3,12 +3,13 @@ import mongoose from "mongoose";
 
 // urlSchema created:-
 const urlSchema = new mongoose.Schema({
-  full_url: {
+  originalUrl: {
     type: String,
     required: true,
+    trim: true,
   },
 
-  short_url: {
+  shortCode: {
     type: String,
     required: true,
     index: true,
@@ -20,11 +21,13 @@ const urlSchema = new mongoose.Schema({
     ref: "user",
     required: true,
   },
+
   clicks: {
     type: Number,
     default: 0,
   },
 },
+
   { timestamps: true }
 );
 
